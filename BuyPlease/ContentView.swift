@@ -6,16 +6,49 @@
 //
 
 import SwiftUI
+import RealmSwift
 
 struct ContentView: View {
+    
+    @ObservedResults(ShoppingList.self) var shoppingLists
+    
+    @State private var isPresented: Bool = false
+    
     var body: some View {
-        VStack {
-            Image(systemName: "globe")
-                .imageScale(.large)
-                .foregroundColor(.accentColor)
-            Text("Hello, world!")
+        NavigationView {
+            VStack {
+                if shoppingLists.isEmpty {
+                    Text("No shopping list")
+                }
+                
+                List {
+                    ForEach(shoppingLists, id: \.id) { shoppingList in
+                        VStack(alignment: .leading) {
+                            Text(shoppingList.title)
+                            Text(shoppingList.address)
+                                .opacity(0.4)
+                        }
+                    }
+                    .onDelete(perform: $shoppingLists.remove)
+                }
+                
+                .navigationTitle("Magazin")
+                .navigationBarTitleDisplayMode(.inline)
+            }
+            .sheet(isPresented: $isPresented, content: {
+                AddShopingListScreen()
+            })
+            .toolbar {
+                ToolbarItem(placement: .navigationBarTrailing) {
+                    Button {
+                        isPresented = true
+                    } label: {
+                        Image(systemName: "plus")
+                    }
+
+                }
         }
-        .padding()
+        }
     }
 }
 
