@@ -23,10 +23,14 @@ struct ContentView: View {
                 
                 List {
                     ForEach(shoppingLists, id: \.id) { shoppingList in
-                        VStack(alignment: .leading) {
-                            Text(shoppingList.title)
-                            Text(shoppingList.address)
-                                .opacity(0.4)
+                        NavigationLink {
+                            ShoppingListItemsScreen(shoppingList: shoppingList)
+                        } label: {
+                            VStack(alignment: .leading) {
+                                Text(shoppingList.title)
+                                Text(shoppingList.address)
+                                    .opacity(0.4)
+                            }
                         }
                     }
                     .onDelete(perform: $shoppingLists.remove)
