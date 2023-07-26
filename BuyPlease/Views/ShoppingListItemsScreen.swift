@@ -12,22 +12,48 @@ struct ShoppingListItemsScreen: View {
     
     @State private var isPresented: Bool = false
     @State private var selectedItemIds: [ObjectId] = []
+    @State private var selectedCategory: String = "All"
     @ObservedRealmObject var shoppingList: ShoppingList
+    
+    var items: [ShoppingItem] {
+        if(selectedCategory == "All") {
+            return Array(shoppingList.items)
+        } else {
+            return shoppingList.items.sorted(byKeyPath: "title")
+                .filter { $0.category == selectedCategory }
+        }
+    }
     
     var body: some View {
         VStack {
-            if shoppingList.items.isEmpty {
+            
+            CategoryFilterView(selectedCategory: $selectedCategory)
+                .padding()
+            
+            if items.isEmpty {
                 Text("No items found.")
             }
             
             List {
-                ForEach(shoppingList.items) { item in
-                    ShoppingItemCell(item: item, selected: selectedItemIds.contains(item.id)) { selected in
-                        if selected {
-                            selectedItemIds.append(item.id)
+                ForEach(items) { item in
+                    
+                    NavigationLink {
+                        AddShoppingListItemsScreen(shoppingList: shoppingList, itemToEdit: item)
+                    } label: {
+                        ShoppingItemCell(item: item, selected: selectedItemIds.contains(item.id)) { selected in
+                            if selected {
+                                selectedItemIds.append(item.id)
+                                if let indexToDelete = shoppingList.items.firstIndex(where: {$0.id == item.id}) {
+                                    $shoppingList.items.remove(at: indexToDelete)
+                                }
+                            }
                         }
                     }
+
+                    
+                    
                 }
+                .onDelete(perform: $shoppingList.items.remove)
             }
             
             
